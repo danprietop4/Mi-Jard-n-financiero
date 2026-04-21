@@ -1,9 +1,10 @@
-import { LayoutDashboard, ArrowLeftRight, PiggyBank, Target, Handshake, ShoppingCart, Settings } from "lucide-react";
+import { LayoutDashboard, ArrowLeftRight, PiggyBank, Target, Handshake, ShoppingCart, Settings, DollarSign } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/" },
+  { icon: DollarSign, label: "Mi Capital", path: "/mi-capital" },
   { icon: ArrowLeftRight, label: "Transacciones", path: "/transacciones" },
   { icon: PiggyBank, label: "Presupuesto", path: "/presupuesto" },
   { icon: Target, label: "Metas", path: "/metas" },

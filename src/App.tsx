@@ -10,6 +10,7 @@ import Metas from "./pages/Metas.tsx";
 import Configuracion from "./pages/Configuracion.tsx";
 import Prestamos from "./pages/Prestamos.tsx";
 import ListaDeCompras from "./pages/ListaDeCompras.tsx";
+import MiCapital from "./pages/MiCapital.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -22,6 +23,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/mi-capital" element={<MiCapital />} />
           <Route path="/transacciones" element={<Transacciones />} />
           <Route path="/presupuesto" element={<Presupuesto />} />
           <Route path="/metas" element={<Metas />} />

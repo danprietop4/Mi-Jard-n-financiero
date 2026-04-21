@@ -1,24 +1,13 @@
 import { useState } from "react";
-import { Plus, Search, ArrowUpRight, ArrowDownLeft, Filter } from "lucide-react";
+import { Plus, Search, ArrowUpRight, ArrowDownLeft, Filter, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import AppSidebar from "@/components/AppSidebar";
-
-interface Transaction {
-  id: string;
-  date: string;
-  description: string;
-  category: string;
-  type: "income" | "expense";
-  amount: number;
-}
-
-const initialTransactions: Transaction[] = [];
+import { useTransactions } from "@/hooks/useTransactions";
+import { fmtBs } from "@/lib/formatters";
 
 const categories = ["Todas", "Salario", "Freelance", "Inversiones", "Renta", "Comida", "Transporte", "Servicios", "Entretenimiento", "Ahorro", "Salud", "Educación"];
-
-const fmt = (n: number) => `$${n.toLocaleString("en-US", { minimumFractionDigits: 2 })}`;
 
 const getCategoryStyle = (cat: string) => {
   switch (cat) {
@@ -32,7 +21,7 @@ const getCategoryStyle = (cat: string) => {
 };
 
 const Transacciones = () => {
-  const [transactions, setTransactions] = useState(initialTransactions);
+  const { transactions, addTransaction, removeTransaction } = useTransactions();
   const [search, setSearch] = useState("");
   const [filterType, setFilterType] = useState<"all" | "income" | "expense">("all");
   const [filterCategory, setFilterCategory] = useState("Todas");
@@ -49,17 +38,15 @@ const Transacciones = () => {
   const totalIncome = filtered.filter((t) => t.type === "income").reduce((s, t) => s + t.amount, 0);
   const totalExpense = filtered.filter((t) => t.type === "expense").reduce((s, t) => s + t.amount, 0);
 
-  const addTransaction = () => {
+  const handleAddTransaction = () => {
     if (!newTx.description || !newTx.amount) return;
-    const tx: Transaction = {
-      id: Date.now().toString(),
+    addTransaction({
       date: newTx.date,
       description: newTx.description,
       category: newTx.category,
       type: newTx.type,
       amount: parseFloat(newTx.amount),
-    };
-    setTransactions((prev) => [tx, ...prev]);
+    });
     setNewTx({ description: "", amount: "", category: "Comida", type: "expense", date: new Date().toISOString().split("T")[0] });
     setShowForm(false);
   };
@@ -93,7 +80,7 @@ const Transacciones = () => {
                     <SelectItem value="expense">Gasto</SelectItem>
                   </SelectContent>
                 </Select>
-                <Button onClick={addTransaction} className="rounded-sm bg-foreground text-background hover:bg-foreground/90">Agregar</Button>
+                <Button onClick={handleAddTransaction} className="rounded-sm bg-foreground text-background hover:bg-foreground/90">Agregar</Button>
               </div>
               <div className="mt-2">
                 <Select value={newTx.category} onValueChange={(v) => setNewTx({ ...newTx, category: v })}>
@@ -132,11 +119,11 @@ const Transacciones = () => {
           <div className="flex gap-4">
             <div className="flex items-center gap-2 rounded-sm bg-positive-muted px-3 py-1.5">
               <ArrowDownLeft className="h-3.5 w-3.5 text-positive" />
-              <span className="font-mono-nums text-sm font-medium text-positive">{fmt(totalIncome)}</span>
+              <span className="font-mono-nums text-sm font-medium text-positive">{fmtBs(totalIncome)}</span>
             </div>
             <div className="flex items-center gap-2 rounded-sm bg-negative-muted px-3 py-1.5">
               <ArrowUpRight className="h-3.5 w-3.5 text-negative" />
-              <span className="font-mono-nums text-sm font-medium text-negative">{fmt(totalExpense)}</span>
+              <span className="font-mono-nums text-sm font-medium text-negative">{fmtBs(totalExpense)}</span>
             </div>
             <div className="flex items-center gap-2 rounded-sm bg-muted px-3 py-1.5">
               <span className="text-xs text-muted-foreground">{filtered.length} transacciones</span>
@@ -151,7 +138,8 @@ const Transacciones = () => {
                   <th className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">Fecha</th>
                   <th className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">Descripción</th>
                   <th className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">Categoría</th>
-                  <th className="px-4 py-2.5 text-right text-xs font-medium uppercase tracking-wider text-muted-foreground">Monto</th>
+                  <th className="px-4 py-2.5 text-right text-xs font-medium uppercase tracking-wider text-muted-foreground">Monto (Bs)</th>
+                  <th className="w-10 px-2 py-2.5" />
                 </tr>
               </thead>
               <tbody>
@@ -165,7 +153,12 @@ const Transacciones = () => {
                       </span>
                     </td>
                     <td className={`px-4 py-3 text-right font-mono-nums text-sm font-medium ${tx.type === "income" ? "text-positive" : "text-negative"}`}>
-                      {tx.type === "income" ? "+" : "-"}{fmt(tx.amount)}
+                      {tx.type === "income" ? "+" : "-"}{fmtBs(tx.amount)}
+                    </td>
+                    <td className="px-2 py-3">
+                      <button onClick={() => removeTransaction(tx.id)} className="rounded p-1 text-muted-foreground transition-colors hover:bg-negative/10 hover:text-negative">
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
                     </td>
                   </tr>
                 ))}
